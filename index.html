@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Jobs Editor</title>
+<title>Jobs Quick Entry</title>
 
 <style>
 body {
@@ -39,20 +39,15 @@ input {
   border: 1px solid #ccc;
 }
 
-button {
-  width: 100%;
-  padding: 16px;
-  font-size: 18px;
-  margin-top: 15px;
-  border: none;
-  border-radius: 12px;
-  background: #2ecc71;
-  color: white;
+#rowDisplay {
+  margin-top: 10px;
+  font-size: 14px;
+  color: #666;
 }
 
-.rowBox {
-  margin-top: 15px;
-  font-size: 14px;
+#status {
+  margin-top: 10px;
+  font-size: 13px;
   color: #666;
 }
 </style>
@@ -64,17 +59,14 @@ button {
 
   <div class="card">
 
-    <h2>Jobs Quick Editor</h2>
+    <h2>Jobs Quick Entry</h2>
 
-    <input id="rowInput" type="number" placeholder="Row number (starts at 4)">
+    <div id="rowDisplay">Row: 4</div>
 
     <input id="jobNumber" type="text" placeholder="Job Number (Column B)">
-
     <input id="cost" type="number" placeholder="$ Cost (Column G)">
 
-    <button onclick="save()">SAVE</button>
-
-    <div class="rowBox" id="status"></div>
+    <div id="status"></div>
 
   </div>
 
@@ -83,34 +75,58 @@ button {
 <script>
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB5dQUxJwzDCj_mw4uuq5OAqR5IMmKgtLYVfPOxUHQ8Gpxn8ARQs5G5udhXHTyZ2aycw/exec";
 
-function save() {
-  const row = document.getElementById("rowInput").value;
+let currentRow = 4;
+
+/**
+ * 🚀 SAVE + AUTO NEXT ROW
+ */
+function saveAndNext() {
   const jobNumber = document.getElementById("jobNumber").value;
   const cost = document.getElementById("cost").value;
-
-  if (!row) {
-    alert("Enter row number");
-    return;
-  }
 
   document.getElementById("status").innerText = "Saving...";
 
   const url =
     SCRIPT_URL +
-    "?row=" + row +
+    "?row=" + currentRow +
     "&jobNumber=" + encodeURIComponent(jobNumber) +
     "&cost=" + encodeURIComponent(cost);
 
   fetch(url)
     .then(r => r.json())
-    .then(res => {
-      document.getElementById("status").innerText =
-        "Saved row " + res.row + " ✔";
+    .then(() => {
+
+      currentRow++;
+
+      document.getElementById("rowDisplay").innerText =
+        "Row: " + currentRow;
 
       document.getElementById("jobNumber").value = "";
       document.getElementById("cost").value = "";
+
+      document.getElementById("jobNumber").focus();
+
+      document.getElementById("status").innerText =
+        "Saved ✔ (Row " + (currentRow - 1) + ")";
     });
 }
+
+/**
+ * ⌨️ ENTER KEY = SAVE + NEXT
+ */
+document.addEventListener("keydown", function(e) {
+  if (e.key === "Enter") {
+    e.preventDefault();
+    saveAndNext();
+  }
+});
+
+/**
+ * focus first field on load
+ */
+window.onload = () => {
+  document.getElementById("jobNumber").focus();
+};
 </script>
 
 </body>
