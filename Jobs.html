@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jobs Editor</title>
+
+<style>
+body {
+  font-family: Arial;
+  margin: 0;
+  background: #f4f4f4;
+}
+
+.wrap {
+  max-width: 500px;
+  margin: auto;
+  padding: 20px;
+}
+
+.card {
+  background: white;
+  padding: 25px;
+  border-radius: 16px;
+  margin-top: 60px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.08);
+  text-align: center;
+}
+
+h2 {
+  margin-bottom: 20px;
+}
+
+input {
+  width: 100%;
+  padding: 14px;
+  font-size: 16px;
+  margin-top: 10px;
+  border-radius: 10px;
+  border: 1px solid #ccc;
+}
+
+button {
+  width: 100%;
+  padding: 16px;
+  font-size: 18px;
+  margin-top: 15px;
+  border: none;
+  border-radius: 12px;
+  background: #2ecc71;
+  color: white;
+}
+
+.rowBox {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #666;
+}
+</style>
+</head>
+
+<body>
+
+<div class="wrap">
+
+  <div class="card">
+
+    <h2>Jobs Quick Editor</h2>
+
+    <input id="rowInput" type="number" placeholder="Row number (starts at 4)">
+
+    <input id="jobNumber" type="text" placeholder="Job Number (Column B)">
+
+    <input id="cost" type="number" placeholder="$ Cost (Column G)">
+
+    <button onclick="save()">SAVE</button>
+
+    <div class="rowBox" id="status"></div>
+
+  </div>
+
+</div>
+
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwB5dQUxJwzDCj_mw4uuq5OAqR5IMmKgtLYVfPOxUHQ8Gpxn8ARQs5G5udhXHTyZ2aycw/exec";
+
+function save() {
+  const row = document.getElementById("rowInput").value;
+  const jobNumber = document.getElementById("jobNumber").value;
+  const cost = document.getElementById("cost").value;
+
+  if (!row) {
+    alert("Enter row number");
+    return;
+  }
+
+  document.getElementById("status").innerText = "Saving...";
+
+  const url =
+    SCRIPT_URL +
+    "?row=" + row +
+    "&jobNumber=" + encodeURIComponent(jobNumber) +
+    "&cost=" + encodeURIComponent(cost);
+
+  fetch(url)
+    .then(r => r.json())
+    .then(res => {
+      document.getElementById("status").innerText =
+        "Saved row " + res.row + " ✔";
+
+      document.getElementById("jobNumber").value = "";
+      document.getElementById("cost").value = "";
+    });
+}
+</script>
+
+</body>
+</html>
