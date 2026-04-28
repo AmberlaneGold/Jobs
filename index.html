@@ -63,8 +63,8 @@ input {
 
     <div id="rowDisplay">Row: 4</div>
 
-    <input id="jobNumber" type="text" placeholder="Job Number (Column B)">
-    <input id="cost" type="number" placeholder="$ Cost (Column G)">
+    <input id="jobNumber" type="text" placeholder="Job Number (Column B)" autocomplete="off">
+    <input id="cost" type="number" placeholder="$ Cost (Column G)" autocomplete="off">
 
     <div id="status"></div>
 
@@ -78,9 +78,9 @@ const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx1JaH7BO7PlsCpxQDIc
 let currentRow = 4;
 
 /**
- * 🚀 SAVE + AUTO NEXT ROW
+ * 🚀 SAVE FUNCTION (WAIT FOR CONFIRMATION)
  */
-function saveAndNext() {
+async function saveAndNext() {
   const jobNumber = document.getElementById("jobNumber").value;
   const cost = document.getElementById("cost").value;
 
@@ -92,10 +92,11 @@ function saveAndNext() {
     "&jobNumber=" + encodeURIComponent(jobNumber) +
     "&cost=" + encodeURIComponent(cost);
 
-  fetch(url)
-    .then(r => r.json())
-    .then(() => {
+  try {
+    const res = await fetch(url, { method: "GET" });
+    const data = await res.json();
 
+    if (data.success) {
       currentRow++;
 
       document.getElementById("rowDisplay").innerText =
@@ -107,22 +108,37 @@ function saveAndNext() {
       document.getElementById("jobNumber").focus();
 
       document.getElementById("status").innerText =
-        "Saved ✔ (Row " + (currentRow - 1) + ")";
-    });
+        "Saved ✔ Row " + (currentRow - 1);
+    } else {
+      document.getElementById("status").innerText =
+        "Error saving row";
+    }
+
+  } catch (err) {
+    document.getElementById("status").innerText =
+      "Network error";
+  }
 }
 
 /**
- * ⌨️ ENTER KEY = SAVE + NEXT
+ * ⌨️ ENTER KEY HANDLING (FIXED RELIABILITY)
  */
 document.addEventListener("keydown", function(e) {
   if (e.key === "Enter") {
     e.preventDefault();
+
+    // small safety check so empty accidental enter doesn't spam
+    const job = document.getElementById("jobNumber").value;
+    const cost = document.getElementById("cost").value;
+
+    if (job === "" && cost === "") return;
+
     saveAndNext();
   }
 });
 
 /**
- * focus first field on load
+ * 📱 MOBILE FOCUS FIX
  */
 window.onload = () => {
   document.getElementById("jobNumber").focus();
